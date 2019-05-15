@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 # this scipt is to control the remote nodes to resolve web addr 
-# and to access some website  Version 3
+# and to access some website,  Version 3
 # import sqlite3
 import datetime
 # import os

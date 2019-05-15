@@ -1,4 +1,4 @@
-#analyse BGP table of ipv4
+#detect if every node in database is active
 #with threading 
 import threading
 import time
