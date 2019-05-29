@@ -10,11 +10,12 @@ import urllib2
 import MySQLdb as mysql
 from sys import argv
 import time
+import random
 global cur_tab
 
 
 def webprobe(ipver, para2,cmd, _entr) :
-            req = cmd + 'site/homePage?website=' + para2 + '&status=0&ipstatus='+ipver ; #print req
+            req = cmd + 'site/homePage?website=' + para2 + '&status=1&ipstatus='+ipver ; #print req
             result = connect_remote(req)
             _entr.append(ipver); print _entr
             if result == '500':
@@ -86,14 +87,15 @@ cur_tab.execute("set names 'utf8'");  # be sure to encode in utf8
 # tabl.text_factory = lambda x: unicode(x, "utf-8", "ignore")
 # cur_tab=tabl.cursor()
 #cur_tab.execute("select url, type from urllist");urls = cur_tab.fetchall()
-cur_tab.execute("select id, name,  ipv4, ipv6 from 3main_node")
+cur_tab.execute("select id, name,  ipv4, ipv6 from 3main_node ")
 nodes= cur_tab.fetchall()
 # fetch all the url in the list
 if not cur_tab.execute("select id from urllist where status=0"):
     cur_tab.execute("update urllist set status=0")
     cur_tab.execute("commit")
 # 如果表里所有Regstat为1，说明已经跑完，重新把?regstat设为0，重新进行测试
-while   cur_tab.execute("select url, type,id from urllist where status=0 order by rand() limit 1" ) :
+while   cur_tab.execute("select url, type,id from urllist where status=0  \
+ order by rand() limit 1" ) :
         url = cur_tab.fetchone();  i=0
         err=0
         try :
@@ -105,7 +107,10 @@ while   cur_tab.execute("select url, type,id from urllist where status=0 order b
         if err==1 :
            continue
         # 读出的节点设regstat设为1
-        for i in range(len(nodes)):
+        idxset=list(range(len(nodes)))
+        random.shuffle(idxset)
+        # shuffle the node list so all node will not be probed at same time.
+        for i in idxset :
             if version == '4':
                 para1 = nodes[i][2];  # source ipv4addr
             else:
