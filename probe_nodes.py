@@ -47,15 +47,17 @@ class updatedb(threading.Thread) :
                 # source ipv6 addr
         para2 = url
         print node ; #fp.write(str(node))
-        if version == '6':
-                cmd = 'http://[' + para1 + ']:9050/'
-        else:
-                cmd = 'http://' + para1 + ':9050/';  # /site/domainARecord?website=+para2
-        req = cmd + 'site/homePage?website=' + para2 + '&status=0&ipstatus=4'
-        result=self.connect_remote(req)
-        print "return result %s" %  result; #fp.write(str(result)+'\r')
-        cur_tab_sub.execute("insert nodestatus(id, result) value(%d,'%s' )" % (node[0], result)) 
-        cur_tab_sub.execute("commit")            
+        ports =["9050","33033"]
+        for port in ports :
+          if version == '6':
+                cmd = 'http://[' + para1 + ']:'+port+'/'
+          else:
+                cmd = 'http://' + para1 + ':'+port+'/';  # /site/domainARecord?website=+para2
+          req = cmd + 'site/homePage?website=' + para2 + '&status=0&ipstatus=4'
+          result=self.connect_remote(req)
+          print "return result %s" %  result; #fp.write(str(result)+'\r')
+          cur_tab_sub.execute("insert nodestatus(id, result,port) value(%d,'%s',%d )" % (node[0], result, int(port))) 
+          cur_tab_sub.execute("commit")            
       cur_tab_sub.close()
       tabl_sub.close()
 
@@ -75,7 +77,7 @@ cur_tab.execute("set names 'utf8'");  # be sure to encode in utf8
 cur_tab.execute("select id, name,  ipv4, ipv6 from v6view")
 nodes= list(cur_tab.fetchall())
 cur_tab.execute("truncate nodestatus")
-n=2
+n=5
 threads=[]
 startTime=int(time.time())
 for thrd in range(n) :
@@ -97,9 +99,9 @@ for th in threads :
       print "end" 
 endTime=int(time.time())
 print "Duration %s"  % (endTime-startTime)
-cur_tab.execute("update v6view set httpstat='500' where httpstat='200'")
+cur_tab.execute("update v6view set httpstat='500' ")
 cur_tab.execute("commit")
-cur_tab.execute("update v6view, nodestatus set v6view.httpstat='200' where nodestatus.id=v6view.id and nodestatus.result regexp '^[1-9][0-9]*$'")
+cur_tab.execute("update v6view, nodestatus set v6view.httpstat='200', v6view.port=nodestatus.port where nodestatus.id=v6view.id and nodestatus.result regexp '^[1-9][0-9]*$'")
 cur_tab.execute("commit")
 cur_tab.close()
 tabl.close()
