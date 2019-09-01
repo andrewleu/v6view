@@ -30,7 +30,7 @@ else:
         version = '6'
     else:
         print "input with -4 or -6, by default use version 4"
-        version = '4'
+        version = '6'
 print version
 reload(sys)
 sys.setdefaultencoding("utf8")
@@ -41,28 +41,28 @@ cur_tab.execute("set names 'utf8'");  # be sure to encode in utf8
 # tabl=sqlite3.connect('v6view.s3db',check_same_thread = False)
 # tabl.text_factory = lambda x: unicode(x, "utf-8", "ignore")
 # cur_tab=tabl.cursor()
-version='4'
-if not cur_tab.execute("select id,name, prov, city, ipv4, ipv6 from v6viewv where regstat='0' and httpstat=200") : 
+version='6'
+if not cur_tab.execute("select id,name, prov, city, ipv4, ipv6 from v6viewv where regstat='0'") : 
 #v6viewv is view of v6view for coding convinience; the previous one is 4main_node view
 #    l=cur_tab.fetchall(); print l
     cur_tab.execute("update v6view set regstat='0' ")
     cur_tab.execute("commit")
 
 #如果表里所有Regstat，说明已经跑完，重新把 regstat设为0，重新进行测
-cur_tab.execute("select id,name, prov, city, ipv4, ipv6 from v6viewv where  httpstat=200 ") ;  
+cur_tab.execute("select id,name, prov, city, ipv4, ipv6 from 3main_node ") ;  
 # all available probe
 lines = cur_tab.fetchall()
 i = 0
 #读出表里的所有node
 #idxset=list(rang(len(lines)))
 #random.shuffle(idxset)
-while cur_tab.execute("select id, name, prov, city, ipv4, ipv6 from v6viewv where regstat='0' and httpstat=200 order by rand() limit 1"):
+while cur_tab.execute("select id, name, prov, city, ipv4, ipv6 from 3main_node where regstat='0' order by rand() limit 1"):
     line = cur_tab.fetchone();
     excpt=''
     try :
        cur_tab.execute("update v6view set regstat='1' where id= %d" % line[0])       
     except Exception as e :
-        print e
+        print "mysql update error： %s" % e
         excpt='ex'
     finally: 
          cur_tab.execute("commit")
@@ -87,11 +87,11 @@ while cur_tab.execute("select id, name, prov, city, ipv4, ipv6 from v6viewv wher
             cmd = 'http://[' + para1 + ']:9050/ping/pingPop?' + 'ipv4=' + para2 + '&' + 'ipv6=' + para3 + '&count=20';
         else:
             cmd = 'http://' + para1 + ':9050/ping/pingPop?' + 'ipv4=' + para2 + '&' + 'ipv6=' + para3 + '&count=20'
-        print cmd
+        print "the http commd: %s" % cmd
         # when utilising urllib2 the "\"will not put before "&"
         result = connect_remote(cmd)
         result = json.loads(result)
-        print result        
+        print "return result: %s" % result        
         if result.get('code') == '0': #测试错误结果处理
             result = '{"code":"0","resultObject":{"ipv4Delay":"0","ipv4MinDelay":"0","ipv4MaxDelay":"0","ipv4DouDong":"0","ipv6Lost":"0","ipv6MinDelay":"0", \
              "ipv6MaxDelay":"0","ipv4Lost":"0","ipv6Delay":"0","ipv6DouDong":"0.0"}}'
