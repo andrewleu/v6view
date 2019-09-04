@@ -42,7 +42,7 @@ cur_tab.execute("set names 'utf8'");  # be sure to encode in utf8
 # tabl.text_factory = lambda x: unicode(x, "utf-8", "ignore")
 # cur_tab=tabl.cursor()
 version='6'
-if not cur_tab.execute("select id,name, prov, city, ipv4, ipv6 from v6viewv where regstat='0'") : 
+if not cur_tab.execute("select id,name, prov, city, ipv4, ipv6 from 3main_node where regstat='0'") : 
 #v6viewv is view of v6view for coding convinience; the previous one is 4main_node view
 #    l=cur_tab.fetchall(); print l
     cur_tab.execute("update v6view set regstat='0' ")
