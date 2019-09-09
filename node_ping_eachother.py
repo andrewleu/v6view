@@ -34,8 +34,22 @@ else:
 print version
 reload(sys)
 sys.setdefaultencoding("utf8")
-dbaddr = "127.0.0.1"
-tabl = mysql.connect(dbaddr, 'root', 'rtnet', 'v6view', charset='utf8')
+try :
+   e=''
+   fh=open('dbconfig.json',mode='r');#file handler
+   config=fh.read()
+except Exception as e:
+   print e
+finally:
+   fh.close()
+if e!='' :
+   exit()
+config=json.loads(config)
+dbaddr=config.get("dbAddr")
+username=config.get("rootName")
+userpass=config.get("rootPass")
+tabl = mysql.connect(dbaddr,username ,userpass , 'v6view', charset='utf8')
+
 cur_tab = tabl.cursor();
 cur_tab.execute("set names 'utf8'");  # be sure to encode in utf8
 # tabl=sqlite3.connect('v6view.s3db',check_same_thread = False)

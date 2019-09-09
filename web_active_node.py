@@ -8,7 +8,7 @@ import socket
 import select
 import os
 import urllib2
-
+import json
 
 def connect_remote(cmmd):
     req = urllib2.Request(cmmd)
@@ -23,8 +23,21 @@ def connect_remote(cmmd):
 version='4'
 reload(sys)
 sys.setdefaultencoding("utf8")
-dbaddr = "127.0.0.1"
-tabl = mysql.connect(dbaddr, 'root', 'rtnet', 'v6view', charset='utf8')
+try :
+   e=''
+   fh=open('dbconfig.json',mode='r');#file handler
+   config=fh.read()
+except Exception as e:
+   print e
+finally:
+   fh.close()
+if e!='' :
+   exit()
+config=json.loads(config)
+dbaddr=config.get("dbAddr")
+username=config.get("rootName")
+userpass=config.get("rootPass")
+tabl = mysql.connect(dbaddr,username ,userpass , 'v6view', charset='utf8')
 cur_tab = tabl.cursor();
 #fp=open("log",'wb')
 
@@ -37,7 +50,7 @@ cur_tab.execute("select id, name,  ipv4, ipv6 from v6view")
 nodes= cur_tab.fetchall()
 cur_tab.execute("truncate nodestatus")
 # fetch all the url in the list
-# 如果表里所有Regstat为1，说明已经跑完，重新把?regstat设为0，重新进行测试
+
 
 for  node in nodes :
         url = "www.qq.com";i=0
@@ -57,7 +70,11 @@ for  node in nodes :
         print "return result %s" %  result; #fp.write(str(result)+'\r')
         cur_tab.execute("insert nodestatus(id, result) value(%d,'%s' )" % (node[0], result)) 
         cur_tab.execute("commit")
-fp.close()		
+cur_tab.execute("update v6view set httpstat='500' where httpstat='200'")
+cur_tab.execute("commit")
+cur_tab.execute("update v6view, nodestatus set v6view.httpstat='200' where \
+v6view.id=nodestatus.id and nodestatus.result regexp '^[1-9][0-9]*$'")
+cur_tab.execute("commit")
 cur_tab.close()
 tabl.close()
 
