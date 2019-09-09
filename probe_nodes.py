@@ -10,6 +10,7 @@ import os
 import urllib2
 import json
 global mutex, nodes,version
+global dbaddr, username,userpass
 mutex=threading.Lock()
 class updatedb(threading.Thread) :
   def connect_remote(self, cmmd):
@@ -21,8 +22,7 @@ class updatedb(threading.Thread) :
         return e
   def run(self) :
       sys.setdefaultencoding("utf8")
-      dbaddr = "127.0.0.1"
-      tabl_sub = mysql.connect(dbaddr, 'root', 'rtnet', 'v6view', charset='utf8')
+      tabl_sub = mysql.connect(dbaddr, username, userpass, 'v6view', charset='utf8')
       cur_tab_sub = tabl_sub.cursor();
 #fp=open("log",'wb')
       cur_tab_sub.execute("set names 'utf8'");  #
