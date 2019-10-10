@@ -19,6 +19,7 @@ except Exception as e:
    print e
 finally:
    fh.close()
+
 if e!='' :
    exit()
 #resolve json file to abstract parameter
@@ -39,16 +40,17 @@ try:
   head=head.strip().split(',')
   while 1 :
     line=fh.readline()
+    if line=='' :
+        break
     line=line.decode().strip().split(',')
-    if line=="" :
-      break
-    doc=zip(head,line)
-    doc=dict(doc)
-    col.insert(doc)   
+    doc=zip(head,line) ; # make key value tuple pair
+    doc=dict(doc)      ; # make key value document    
+    col.insert(doc)   ;print i; # insert into db
     i+=1
 except Exception as e :
-    pinrt "line: %s " % i
+    #pinrt "lindde: %s ", % i
     print e
 finally:
     fh.close()
+    client.close()
 
